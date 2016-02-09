@@ -11,6 +11,7 @@ public:
 
 private:
 	Text title;
+	Text rainbow[7];
 	Text menuOptions[2];
 	Text signature;
 

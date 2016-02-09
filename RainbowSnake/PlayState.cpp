@@ -52,8 +52,6 @@ void PlayState::init()
 {
 	
 	snake = new Snake();
-	for (int i = 0; i < 150; i++)snake->AddBodyPart();
-
 	apple = new RectangleShape();
 
 	apple->setSize(Vector2f((float)Game::APPLE_SIZE, (float)Game::APPLE_SIZE));

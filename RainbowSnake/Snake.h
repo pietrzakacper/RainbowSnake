@@ -19,11 +19,13 @@ public:
 	void ChangeDirection(Direction dir);
 	void AddBodyPart();
 	void setRainbowColor(RectangleShape& bodyPart);
+	Texture rainbowTexture;
+	Texture getRainbowTexture();
 	bool IsSelfBitting();
 	bool hasDirectionChanged;
 	FloatRect GetHeadFloatRect() const;
 	Vector2f getHeadPosition();
-	bool intersects(const Vector2f position);
+	bool intersects(const Vector2f& position);
 	virtual void draw(sf::RenderTarget & target, sf::RenderStates states) const override;
 
 private:

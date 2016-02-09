@@ -9,7 +9,9 @@ Snake::Snake()
 	:hasDirectionChanged(false)
 {
 	RectangleShape head;
-	head.setFillColor(Color(255, 10 * 1, 0, 70));
+	//rainbowTexture = getRainbowTexture();
+	//head.setTexture(&rainbowTexture);
+	head.setFillColor(Color(255, 10 * 1, 0, 120));
 	head.setSize(Vector2f((float)BODY_SIZE, (float)BODY_SIZE));
 	head.setPosition(640 / 2, 640 / 2);
 
@@ -115,21 +117,21 @@ void Snake::setRainbowColor(RectangleShape& bodyPart)
 		break;
 
 	}
-	bodyPartColor.a = 40;
-	bodyPart.setFillColor(bodyPartColor);
 	bodyPartColor.a = 60;
+	bodyPart.setFillColor(bodyPartColor);
+	bodyPartColor.a = 80;
 	bodyPart.setOutlineColor(bodyPartColor);
 }
 
 bool Snake::IsSelfBitting()
-{
-	FloatRect *head = &m_snakeParts[0].getGlobalBounds();
-	FloatRect *body;
+{	
+	const Vector2f* head = &m_snakeParts[0].getPosition();
+	const Vector2f* body;
 
 	for (unsigned int i = 1; i < m_snakeParts.size(); i++)
 	{
-		body = &m_snakeParts[i].getGlobalBounds();
-		if (head->intersects( *body)) 
+		body = &m_snakeParts[i].getPosition();
+		if (*head == *body) 
 		{
 			return true;
 		}
@@ -143,7 +145,7 @@ FloatRect Snake::GetHeadFloatRect() const
 	return m_snakeParts[0].getGlobalBounds();
 }
 
-bool Snake::intersects(const Vector2f position)
+bool Snake::intersects(const Vector2f& position)
 {
 	for (unsigned int i = 0; i < m_snakeParts.size(); i++)
 	{
@@ -169,4 +171,38 @@ void Snake::draw(RenderTarget & target, RenderStates states) const
 Vector2f Snake::getHeadPosition()
 {
 	return m_snakeParts[0].getPosition();
+}
+
+Texture Snake::getRainbowTexture()
+{
+	RectangleShape rectangles[8];
+
+	for (int i = 0; i < 8; i++)
+	{
+		rectangles[i].setSize(Vector2f((float)BODY_SIZE / 8.f, (float)BODY_SIZE));
+		
+
+		if (i == 0)rectangles[i].setPosition(0, 0);
+		else rectangles[i].setPosition(Vector2f(rectangles[i - 1].getPosition().x + rectangles[i - 1].getGlobalBounds().width, 0));
+		
+	}
+	int alpha = 150;
+	rectangles[0].setFillColor(Color(255, 0, 0, alpha));
+	rectangles[0].setFillColor(Color(255, 128, 0, alpha));
+	rectangles[2].setFillColor(Color(255, 255, 0, alpha));
+	rectangles[3].setFillColor(Color(0, 255, 0, alpha));
+	rectangles[4].setFillColor(Color(0, 255, 255, alpha));
+	rectangles[5].setFillColor(Color(0, 0, 255, alpha));
+	rectangles[6].setFillColor(Color(128, 0, 255, alpha));
+	rectangles[7].setFillColor(Color(255, 0, 255, alpha));
+
+	RenderTexture renderTexture;
+	renderTexture.create(BODY_SIZE, BODY_SIZE);
+
+	renderTexture.clear();
+	for (int i = 0; i < 8; i++)
+		renderTexture.draw(rectangles[i]);
+	renderTexture.display();
+
+	return renderTexture.getTexture();
 }
