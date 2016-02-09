@@ -2,7 +2,8 @@
 #include "State.h"
 #include "MenuState.h"
 #include <Windows.h>
-
+#include "PlayState.h"
+#include <iostream>
 
 
 class Game
@@ -18,9 +19,10 @@ private:
 	RenderWindow window;
 	Font font;
 	Event event;
+	State * actualState;
 	int actualStateID;
-	void changeState(State *actualState);
-	void handleState(State *actualState);
+	void changeState();
+	void handleState();
 	
 public:
 	Game();

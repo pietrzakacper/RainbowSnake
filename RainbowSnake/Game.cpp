@@ -5,10 +5,12 @@
 
 
 Game::Game()
-	:actualStateID(0)
+	:actualStateID(END)
 	
 {
-	window.create(VideoMode(SCRN_WIDTH, SCRN_HEIGHT), "Snake", Style::Close);//TODO panel interfejsu
+	ContextSettings settings;
+	settings.antialiasingLevel = 8;
+	window.create(VideoMode(SCRN_WIDTH, SCRN_HEIGHT), "Snake", Style::Close, settings);//TODO panel interfejsu
 	window.clear();
 	window.display();
 
@@ -30,37 +32,40 @@ Game::~Game()
 
 void Game::runGame()
 {
-	State * actualState;
 	actualState = new MenuState(MENU, window, font);
 	actualState->init();
 
 	while (actualStateID != END)
 	{
 		if (actualStateID != actualState->getSTATE_ID())
-			changeState(actualState);
-
-		handleState(actualState);
+			changeState();
+		
+		handleState();
 		
 	}
 	window.close();
 }
 
-void Game::changeState(State *actualState)
+void Game::changeState()
 {
+	actualState = nullptr;
+
 	switch (actualStateID)
 	{
 		case MENU:
-			
 			actualState = new MenuState(MENU, window, font);
-			actualState->init();
 			break;
-	
+		case PLAY_STATE:
+			actualState = new PlayState(PLAY_STATE, window, font);
+			break;
 	}
+	
+	actualState->init();
 }
 
-void Game::handleState(State * actualState)
-{
-	actualState->update();
+void Game::handleState()
+{	
 	actualStateID = actualState->handleEvents(event);
+	actualState->update();
 	actualState->render();
 }

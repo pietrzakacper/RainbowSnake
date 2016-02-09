@@ -40,13 +40,18 @@ void MenuState::init()
 
 int MenuState::handleEvents(Event& event)
 {
+	Vector2f mousePosition = Vector2f((float)Mouse::getPosition(*_window).x, (float)Mouse::getPosition(*_window).y);
+
 	while (_window->pollEvent(event))
 	{
-		if (event.type == Event::Closed)
+		if (event.type == Event::Closed || (event.type == Event::MouseButtonReleased && menuOptions[1].getGlobalBounds().contains(mousePosition)))
 			return Game::END;
+
+		else if (event.type == Event::MouseButtonReleased && menuOptions[0].getGlobalBounds().contains(mousePosition))
+			return Game::PLAY_STATE;
 	}
 
-	return getSTATE_ID();
+	return STATE_ID;
 }
 
 void MenuState::update()
@@ -58,7 +63,6 @@ void MenuState::update()
 		if (menuOptions[i].getGlobalBounds().contains(mousePosition))
 		{
 			menuOptions[i].setColor(Color::Cyan);
-			cout << "Whatever!" << endl;
 		}
 		else menuOptions[i].setColor(Color::White);
 	}
