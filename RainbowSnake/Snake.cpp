@@ -173,35 +173,36 @@ Vector2f Snake::getHeadPosition()
 	return m_snakeParts[0].getPosition();
 }
 
+void Snake::update()
+{
+	//rainbowTexture = getRainbowTexture();
+}
+
 Texture Snake::getRainbowTexture()
 {
-	RectangleShape rectangles[8];
+	static Clock textureClock;
 
-	for (int i = 0; i < 8; i++)
-	{
-		rectangles[i].setSize(Vector2f((float)BODY_SIZE / 8.f, (float)BODY_SIZE));
-		
-
-		if (i == 0)rectangles[i].setPosition(0, 0);
-		else rectangles[i].setPosition(Vector2f(rectangles[i - 1].getPosition().x + rectangles[i - 1].getGlobalBounds().width, 0));
-		
-	}
+	VertexArray headRectangle = VertexArray(Quads, 4);
 	int alpha = 150;
-	rectangles[0].setFillColor(Color(255, 0, 0, alpha));
-	rectangles[0].setFillColor(Color(255, 128, 0, alpha));
-	rectangles[2].setFillColor(Color(255, 255, 0, alpha));
-	rectangles[3].setFillColor(Color(0, 255, 0, alpha));
-	rectangles[4].setFillColor(Color(0, 255, 255, alpha));
-	rectangles[5].setFillColor(Color(0, 0, 255, alpha));
-	rectangles[6].setFillColor(Color(128, 0, 255, alpha));
-	rectangles[7].setFillColor(Color(255, 0, 255, alpha));
+
+	if (textureClock.getElapsedTime().asSeconds() > 25.5f)textureClock.restart();
+
+	headRectangle[0].color = Color(10*textureClock.getElapsedTime().asSeconds() + 10, 0,0, alpha);
+	headRectangle[1].color = Color(10*textureClock.getElapsedTime().asSeconds(), 10* textureClock.getElapsedTime().asSeconds()+ 10, 0, alpha);
+	headRectangle[2].color = Color(0, 10 * textureClock.getElapsedTime().asSeconds() + 10,0, alpha);
+	headRectangle[3].color = Color(0, 0, 10 * textureClock.getElapsedTime().asSeconds() +10, alpha);
+	headRectangle[0].position = Vector2f(0, 0);
+	headRectangle[1].position = Vector2f(BODY_SIZE, 0);
+	headRectangle[2].position = Vector2f(BODY_SIZE, BODY_SIZE);
+	headRectangle[3].position = Vector2f(0, BODY_SIZE);
+
 
 	RenderTexture renderTexture;
 	renderTexture.create(BODY_SIZE, BODY_SIZE);
 
 	renderTexture.clear();
-	for (int i = 0; i < 8; i++)
-		renderTexture.draw(rectangles[i]);
+	
+		renderTexture.draw(headRectangle);
 	renderTexture.display();
 
 	return renderTexture.getTexture();

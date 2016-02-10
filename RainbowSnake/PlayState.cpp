@@ -70,7 +70,7 @@ void PlayState::init()
 
 void PlayState::update()
 {
-	
+	snake->update();
 
 	if (clock.getElapsedTime().asMilliseconds() >125)//TODO poziomy trudnoœci
 	{
