@@ -4,6 +4,7 @@
 #include <Windows.h>
 #include "PlayState.h"
 #include <iostream>
+#include "FailureState.h"
 
 
 class Game
@@ -15,6 +16,7 @@ public:
 	static const int END = 0;
 	static const int MENU = 1;
 	static const int PLAY_STATE = 2;
+	static const int FAILURE= 3;
 private:
 	RenderWindow window;
 	Font font;

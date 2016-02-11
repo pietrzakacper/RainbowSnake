@@ -4,7 +4,10 @@
 
 
 PlayState::PlayState(int STATE_ID, RenderWindow& window, Font& font)
-	:State(STATE_ID, window, font)
+	:State(STATE_ID, window, font),
+	endOFGAME(false),
+	switchToFailureScreen(false),
+	drawSnake(true)
 {
 }
 
@@ -12,6 +15,10 @@ PlayState::PlayState(int STATE_ID, RenderWindow& window, Font& font)
 
 PlayState::~PlayState()
 {
+	delete snake;
+	delete apple;
+	music.stop();
+	
 }
 
 Vector2f PlayState::getRandomPosition()
@@ -52,54 +59,130 @@ void PlayState::init()
 {
 	
 	snake = new Snake();
+	//for (int i = 0; i < 250; i++)snake->AddBodyPart();
 	apple = new RectangleShape();
-
+	music.openFromFile("data/FreeKO_Fame.ogg");
+	music.setLoop(true);
+	music.setRelativeToListener(true);
+	
 	apple->setSize(Vector2f((float)Game::APPLE_SIZE, (float)Game::APPLE_SIZE));
-	apple->setFillColor(Color(230,230,230,90));
-	apple->setOutlineThickness(-1.f);
-	apple->setOutlineColor(Color::Cyan);
+	//apple->setFillColor(Color(230,230,230,90));
+	apple->setTexture(&appleTexture);
+	updateAppleRainbowTexture();
 	apple->setPosition(getRandomPosition()*(float)Game::APPLE_SIZE);
 
 	setBackground();
 	mapBounds = FloatRect(0, 0, Game::SCRN_WIDTH, Game::SCRN_HEIGHT);
+
+	transparentBackgroundLayer.setPosition(Vector2f(0,0));
+	transparentBackgroundLayer.setSize(Vector2f(Game::SCRN_WIDTH, Game::SCRN_HEIGHT));
+	alphaColorChannel = 0;
+	transparentBackgroundLayer.setFillColor(Color(0, 0, 0, alphaColorChannel));
 	
 	clock.restart();
 
+	music.play();
+}
+
+void PlayState::updateAppleRainbowTexture()
+{	
+	RectangleShape rainbow;
+	rainbow.setSize(Vector2f(Game::APPLE_SIZE, Game::APPLE_SIZE));
+	rainbow.setPosition(Vector2f(0, 0));
+
+		Color rectangleNarrowtColor;
+		int n = rand() % 150 + 1;
+
+		switch (int(n % 150) / 25)
+		{
+		case 0:
+			rectangleNarrowtColor = Color(255, 10 * (n % 25), 0);
+			break;
+		case 1:
+			rectangleNarrowtColor = Color(255 - 10 * (n % 25), 255, 0);
+			break;
+		case 2:
+			rectangleNarrowtColor = Color(0, 255, 10 * (n % 25));
+			break;
+		case 3:
+			rectangleNarrowtColor = Color(0, 255 - 10 * (n % 25), 255);
+			break;
+		case 4:
+			rectangleNarrowtColor = Color(10 * (n % 25), 0, 255);
+			break;
+		case 5:
+			rectangleNarrowtColor = Color(255, 0, 255 - 10 * (n % 25));
+			break;
+
+		}
 	
+		rainbow.setFillColor(rectangleNarrowtColor);
+
+
+	RenderTexture rainbowTexture;
+	rainbowTexture.create(Game::APPLE_SIZE, Game::APPLE_SIZE);
+
+	rainbowTexture.clear();
+
+	rainbowTexture.draw(rainbow);
+
+	rainbowTexture.display();
+
+	appleTexture = rainbowTexture.getTexture();
+
 }
 
 void PlayState::update()
-{
-	snake->update();
+{	
 
-	if (clock.getElapsedTime().asMilliseconds() >125)//TODO poziomy trudnoœci
+	if (clock.getElapsedTime().asMilliseconds() > 125 && !endOFGAME)//TODO poziomy trudnoœci
 	{
-		snake->Move();
-		
+		updateAppleRainbowTexture();
 
-		if (snake->GetHeadFloatRect() == apple->getGlobalBounds())
+		if (snake->IsSelfBitting())
 		{
-			
-			
-			apple->setPosition(getRandomPosition()*(float)Game::APPLE_SIZE);
-			snake->AddBodyPart();
+
+			endOFGAME = true;
 		}
 
-		clock.restart();
-	}
 
-	if (snake->IsSelfBitting())
+		else if (!mapBounds.contains(snake->getHeadPosition()))
+		{
+			endOFGAME = true;
+		}
+
+		if (!endOFGAME) 
+		{
+			snake->Move();
+
+			if (snake->GetHeadFloatRect() == apple->getGlobalBounds())
+			{
+				apple->setPosition(getRandomPosition()*(float)Game::APPLE_SIZE);
+				snake->AddBodyPart();
+			}
+
+			clock.restart();
+		}
+	}
+	
+	if (endOFGAME)
+		handleFailure();
+
+
+}
+
+void PlayState::handleFailure()
+{
+	music.setPitch(music.getPitch()*0.95);
+	music.setVolume(music.getVolume() *0.95);
+
+	if (!playFailureAnimation())switchToFailureScreen = true;
+
+	if (alphaColorChannel < 120)
 	{
-		
-		cout << "Ugryzienie..." << endl;
+		alphaColorChannel+=1;
+		transparentBackgroundLayer.setFillColor(Color(0, 0, 0, alphaColorChannel));
 	}
-
-
-	if (!mapBounds.contains(snake->getHeadPosition()))
-	{
-		cout << "Wyjœcie poza ekran" << endl;
-	}
-
 }
 
 int PlayState::handleEvents(Event& event)
@@ -131,8 +214,10 @@ int PlayState::handleEvents(Event& event)
 				break;
 			}
 		}
+		
 	}
-		return STATE_ID;
+	if (switchToFailureScreen)return Game::FAILURE;
+	return STATE_ID;
 
 }
 
@@ -145,7 +230,34 @@ void PlayState::render()
 	
 	_window->draw(*apple);
 	
-	_window->draw(*snake);
+	if(drawSnake)_window->draw(*snake);
+
+	_window->draw(transparentBackgroundLayer);
 
 	_window->display();
+}
+
+bool PlayState::playFailureAnimation()
+{	
+	static int animationCounter;
+	static Clock clock;
+
+	if (clock.getElapsedTime().asSeconds() > 0.3f && drawSnake)
+	{
+		drawSnake = false;
+		clock.restart();
+	}
+	else if (clock.getElapsedTime().asSeconds() > 0.2f && !drawSnake)
+	{
+		drawSnake = true;
+		clock.restart();
+		animationCounter++;
+	}
+
+	if (animationCounter >= 3)
+	{	
+		animationCounter = 0;
+		return false;
+	}
+	return true;
 }

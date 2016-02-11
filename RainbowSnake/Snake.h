@@ -2,6 +2,7 @@
 #include <SFML\Graphics.hpp>
 #include <vector>
 
+
 using namespace sf;
 using namespace std;
 
@@ -27,6 +28,9 @@ public:
 	Vector2f getHeadPosition();
 	bool intersects(const Vector2f& position);
 	void update();
+	Vector2f getMovement();
+	Vector2f getDirection();
+
 	virtual void draw(sf::RenderTarget & target, sf::RenderStates states) const override;
 
 private:

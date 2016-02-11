@@ -2,6 +2,7 @@
 #include "State.h"
 #include "Snake.h"
 #include "Game.h"
+#include <SFML/Audio.hpp>
 
 
 class PlayState :
@@ -15,13 +16,19 @@ private:
 	Snake* snake;
 	RectangleShape* apple;
 	Clock clock;
-
+	bool endOFGAME, drawSnake, switchToFailureScreen;
 	vector <RectangleShape> mapTiles;
 	FloatRect mapBounds;
+	Music music;
+	RectangleShape transparentBackgroundLayer;
+	int alphaColorChannel;
+	Texture appleTexture;
 
 	Vector2f getRandomPosition();
 	void setBackground();
-
+	void updateAppleRainbowTexture();
+	bool playFailureAnimation();
+	void handleFailure();
 public:
 	virtual void init() override;
 	virtual void update() override;

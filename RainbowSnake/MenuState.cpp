@@ -42,19 +42,19 @@ void MenuState::init()
 	title.setColor(Color::Cyan);
 	title.setPosition(Vector2f(rainbow[6].getPosition().x + rainbow[6].getGlobalBounds().width + 16, (float)Game::APPLE_SIZE/2.f));
 
-	menuOptions[0].setString("PLAY");
-	menuOptions[0].setFont(*_font);
-	menuOptions[0].setCharacterSize(64);
-	menuOptions[0].setColor(Color::White);
-	menuOptions[0].setOrigin(Vector2f(menuOptions[0].getGlobalBounds().width / 2.f, menuOptions[0].getGlobalBounds().height / 2.f));
-	menuOptions[0].setPosition(Vector2f((float)Game::SCRN_WIDTH / 2.f, (float)Game::SCRN_HEIGHT / 2.f - (float)Game::APPLE_SIZE));
+	const int howManyMenuOptions = 2;
 
-	menuOptions[1].setString("EXIT");
-	menuOptions[1].setFont(*_font);
-	menuOptions[1].setCharacterSize(64);
-	menuOptions[1].setColor(Color::White);
-	menuOptions[1].setOrigin(Vector2f(menuOptions[1].getGlobalBounds().width / 2.f, menuOptions[1].getGlobalBounds().height / 2.f));
-	menuOptions[1].setPosition(Vector2f((float)Game::SCRN_WIDTH / 2.f - 5.f, (float)Game::SCRN_HEIGHT / 2.f + (float)Game::APPLE_SIZE));
+	string menuOptionsStrings[howManyMenuOptions] = {"PLAY", "EXIT"};
+	for (int i = 0; i < howManyMenuOptions; i++)
+	{
+		menuOptions[i].setString(menuOptionsStrings[i]);
+		menuOptions[i].setFont(*_font);
+		menuOptions[i].setCharacterSize(64);
+		menuOptions[i].setColor(Color::White);
+		menuOptions[i].setOrigin(Vector2f(menuOptions[i].getGlobalBounds().width / 2.f, menuOptions[i].getGlobalBounds().height / 2.f));
+		menuOptions[i].setPosition(Vector2f((float)Game::SCRN_WIDTH / 2.f, (float)Game::SCRN_HEIGHT / 2.f - (float)Game::APPLE_SIZE + 2.5*(float)i*(float)Game::APPLE_SIZE));
+	}
+
 }
 
 int MenuState::handleEvents(Event& event)

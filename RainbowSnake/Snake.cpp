@@ -1,19 +1,17 @@
 #include "Snake.h"
+#include "Game.h"
 
 
 
-const int BODY_SIZE = 32;
 using namespace sf;
 
 Snake::Snake()
 	:hasDirectionChanged(false)
 {
 	RectangleShape head;
-	//rainbowTexture = getRainbowTexture();
-	//head.setTexture(&rainbowTexture);
 	head.setFillColor(Color(255, 10 * 1, 0, 120));
-	head.setSize(Vector2f((float)BODY_SIZE, (float)BODY_SIZE));
-	head.setPosition(640 / 2, 640 / 2);
+	head.setSize(Vector2f((float)Game::APPLE_SIZE, (float)Game::APPLE_SIZE));
+	head.setPosition(Game::SCRN_WIDTH/ 2, Game::SCRN_HEIGHT / 2);
 
 
 
@@ -27,8 +25,7 @@ Snake::~Snake()
 {
 }
 
-
-void Snake::Move()
+Vector2f Snake::getDirection()
 {
 
 	Vector2f dir(0.f, 0.f);
@@ -56,9 +53,20 @@ void Snake::Move()
 		break;
 	}
 	hasDirectionChanged = false;
+	return dir;
+}
+
+Vector2f Snake::getMovement()
+{
+	Vector2f direction = getDirection();
+	Vector2f offset(direction.x * Game::APPLE_SIZE, direction.y * Game::APPLE_SIZE);
+	return offset;
+}
+
+void Snake::Move()
+{
 	Vector2f prevPos = m_snakeParts[0].getPosition();
-	Vector2f offset(dir.x * BODY_SIZE, dir.y * BODY_SIZE);
-	m_snakeParts[0].move(offset);
+	m_snakeParts[0].move(getMovement());
 
 	for (unsigned int i = 1; i < m_snakeParts.size(); i++)
 	{
@@ -81,12 +89,12 @@ void Snake::ChangeDirection(Direction dir)
 
 void Snake::AddBodyPart()
 {
-	RectangleShape bodyPart(Vector2f((float)BODY_SIZE, (float)BODY_SIZE));
+	RectangleShape bodyPart(Vector2f((float)Game::APPLE_SIZE, (float)Game::APPLE_SIZE));
 
 	setRainbowColor(bodyPart);
 
 	bodyPart.setOutlineThickness(-2.f);
-	bodyPart.setSize(Vector2f((float)BODY_SIZE, (float)BODY_SIZE));
+	bodyPart.setSize(Vector2f((float)Game::APPLE_SIZE, (float)Game::APPLE_SIZE));
 	bodyPart.setPosition(-32, -32);
 	m_snakeParts.push_back(bodyPart);
 }
@@ -127,11 +135,11 @@ bool Snake::IsSelfBitting()
 {	
 	const Vector2f* head = &m_snakeParts[0].getPosition();
 	const Vector2f* body;
-
+	const Vector2f movement = getMovement();
 	for (unsigned int i = 1; i < m_snakeParts.size(); i++)
 	{
 		body = &m_snakeParts[i].getPosition();
-		if (*head == *body) 
+		if (*head + movement == *body)
 		{
 			return true;
 		}
@@ -170,12 +178,12 @@ void Snake::draw(RenderTarget & target, RenderStates states) const
 
 Vector2f Snake::getHeadPosition()
 {
-	return m_snakeParts[0].getPosition();
+	return m_snakeParts[0].getPosition() + getMovement();
 }
 
 void Snake::update()
 {
-	//rainbowTexture = getRainbowTexture();
+	//TODO snake update
 }
 
 Texture Snake::getRainbowTexture()
@@ -192,13 +200,13 @@ Texture Snake::getRainbowTexture()
 	headRectangle[2].color = Color(0, 10 * textureClock.getElapsedTime().asSeconds() + 10,0, alpha);
 	headRectangle[3].color = Color(0, 0, 10 * textureClock.getElapsedTime().asSeconds() +10, alpha);
 	headRectangle[0].position = Vector2f(0, 0);
-	headRectangle[1].position = Vector2f(BODY_SIZE, 0);
-	headRectangle[2].position = Vector2f(BODY_SIZE, BODY_SIZE);
-	headRectangle[3].position = Vector2f(0, BODY_SIZE);
+	headRectangle[1].position = Vector2f(Game::APPLE_SIZE, 0);
+	headRectangle[2].position = Vector2f(Game::APPLE_SIZE, Game::APPLE_SIZE);
+	headRectangle[3].position = Vector2f(0, Game::APPLE_SIZE);
 
 
 	RenderTexture renderTexture;
-	renderTexture.create(BODY_SIZE, BODY_SIZE);
+	renderTexture.create(Game::APPLE_SIZE, Game::APPLE_SIZE);
 
 	renderTexture.clear();
 	
