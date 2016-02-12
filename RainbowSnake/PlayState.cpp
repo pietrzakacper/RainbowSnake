@@ -59,7 +59,7 @@ void PlayState::init()
 {
 	
 	snake = new Snake();
-	//for (int i = 0; i < 250; i++)snake->AddBodyPart();
+	.; for (int i = 0; i < 250; i++)snake->AddBodyPart();
 	apple = new RectangleShape();
 	music.openFromFile("data/FreeKO_Fame.ogg");
 	music.setLoop(true);
@@ -80,7 +80,7 @@ void PlayState::init()
 	transparentBackgroundLayer.setFillColor(Color(0, 0, 0, alphaColorChannel));
 	
 	clock.restart();
-
+	music.setVolume(40.f);
 	music.play();
 }
 
