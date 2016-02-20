@@ -13,10 +13,8 @@ Snake::Snake()
 	head.setSize(Vector2f((float)Game::APPLE_SIZE, (float)Game::APPLE_SIZE));
 	head.setPosition(Game::SCRN_WIDTH/ 2, Game::SCRN_HEIGHT / 2);
 
-
-
-
 	m_snakeParts.push_back(head);
+
 	m_direction = DIR_UP;
 }
 
@@ -27,7 +25,6 @@ Snake::~Snake()
 
 Vector2f Snake::getDirection()
 {
-
 	Vector2f dir(0.f, 0.f);
 
 	switch (m_direction)
@@ -46,10 +43,6 @@ Vector2f Snake::getDirection()
 
 	case DIR_DOWN:
 		dir.y = 1;
-		break;
-
-	default:
-		exit(-1);
 		break;
 	}
 	hasDirectionChanged = false;
@@ -133,13 +126,12 @@ void Snake::setRainbowColor(RectangleShape& bodyPart)
 
 bool Snake::IsSelfBitting()
 {	
-	const Vector2f* head = &m_snakeParts[0].getPosition();
-	const Vector2f* body;
-	const Vector2f movement = getMovement();
+	const Vector2f headPositionAfterMovement = m_snakeParts[0].getPosition() + getMovement();
+	const Vector2f* bodyPart;
 	for (unsigned int i = 1; i < m_snakeParts.size(); i++)
 	{
-		body = &m_snakeParts[i].getPosition();
-		if (*head + movement == *body)
+		bodyPart = &m_snakeParts[i].getPosition();
+		if (headPositionAfterMovement == *bodyPart)
 		{
 			return true;
 		}
@@ -153,7 +145,7 @@ FloatRect Snake::GetHeadFloatRect() const
 	return m_snakeParts[0].getGlobalBounds();
 }
 
-bool Snake::intersects(const Vector2f& position)
+bool Snake::contains(const Vector2f& position)
 {
 	for (unsigned int i = 0; i < m_snakeParts.size(); i++)
 	{
@@ -166,7 +158,6 @@ bool Snake::intersects(const Vector2f& position)
 }
 
 
-
 void Snake::draw(RenderTarget & target, RenderStates states) const
 {
 	for (unsigned int i = 0; i < m_snakeParts.size(); i++)
@@ -176,42 +167,9 @@ void Snake::draw(RenderTarget & target, RenderStates states) const
 
 }
 
-Vector2f Snake::getHeadPosition()
+Vector2f Snake::GetHeadPosition()
 {
 	return m_snakeParts[0].getPosition() + getMovement();
 }
 
-void Snake::update()
-{
-	//TODO snake update
-}
 
-Texture Snake::getRainbowTexture()
-{
-	static Clock textureClock;
-
-	VertexArray headRectangle = VertexArray(Quads, 4);
-	int alpha = 150;
-
-	if (textureClock.getElapsedTime().asSeconds() > 25.5f)textureClock.restart();
-
-	headRectangle[0].color = Color(10*textureClock.getElapsedTime().asSeconds() + 10, 0,0, alpha);
-	headRectangle[1].color = Color(10*textureClock.getElapsedTime().asSeconds(), 10* textureClock.getElapsedTime().asSeconds()+ 10, 0, alpha);
-	headRectangle[2].color = Color(0, 10 * textureClock.getElapsedTime().asSeconds() + 10,0, alpha);
-	headRectangle[3].color = Color(0, 0, 10 * textureClock.getElapsedTime().asSeconds() +10, alpha);
-	headRectangle[0].position = Vector2f(0, 0);
-	headRectangle[1].position = Vector2f(Game::APPLE_SIZE, 0);
-	headRectangle[2].position = Vector2f(Game::APPLE_SIZE, Game::APPLE_SIZE);
-	headRectangle[3].position = Vector2f(0, Game::APPLE_SIZE);
-
-
-	RenderTexture renderTexture;
-	renderTexture.create(Game::APPLE_SIZE, Game::APPLE_SIZE);
-
-	renderTexture.clear();
-	
-		renderTexture.draw(headRectangle);
-	renderTexture.display();
-
-	return renderTexture.getTexture();
-}

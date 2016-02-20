@@ -6,11 +6,10 @@
 
 Game::Game()
 	:actualStateID(END)
-	
 {
 	ContextSettings settings;
 	settings.antialiasingLevel = 8;
-	window.create(VideoMode(SCRN_WIDTH, SCRN_HEIGHT), "Snake", Style::Close, settings);//TODO panel interfejsu
+	window.create(VideoMode(SCRN_WIDTH, SCRN_HEIGHT), "Snake", Style::Close, settings);
 	window.setFramerateLimit(60);
 	window.clear();
 	window.display();
@@ -22,8 +21,6 @@ Game::Game()
 	}
 
 	actualStateID=MENU;
-	
-	
 }
 
 
@@ -42,7 +39,6 @@ void Game::runGame()
 			changeState();
 		
 		handleState();
-		
 	}
 	window.close();
 }
@@ -50,7 +46,6 @@ void Game::runGame()
 void Game::changeState()
 {
 	delete actualState;
-	actualState = nullptr;
 
 	switch (actualStateID)
 	{
@@ -58,7 +53,6 @@ void Game::changeState()
 			actualState = new MenuState(MENU, window, font);
 			break;
 		case PLAY_STATE:
-			cout << "Zmiana na grê" << endl;
 			actualState = new PlayState(PLAY_STATE, window, font);
 			break;
 		case FAILURE:

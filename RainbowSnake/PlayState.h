@@ -13,22 +13,28 @@ public:
 	~PlayState();
 
 private:
-	Snake* snake;
-	RectangleShape* apple;
+	Snake* _snake;
+	RectangleShape* _apple;
 	Clock clock;
-	bool endOFGAME, drawSnake, switchToFailureScreen;
 	vector <RectangleShape> mapTiles;
 	FloatRect mapBounds;
 	Music music;
 	RectangleShape transparentBackgroundLayer;
-	int alphaColorChannel;
 	Texture appleTexture;
 
+	bool endOfGame;
+	bool drawSnake;
+	bool switchToFailureScreen;
+
 	Vector2f getRandomPosition();
+	Color getRandomColor();
 	void setBackground();
-	void updateAppleRainbowTexture();
+	void setAppleFillColor();
+	
 	bool playFailureAnimation();
+	bool doesFailureOccurs();
 	void handleFailure();
+	float alphaColorChannel;
 public:
 	virtual void init() override;
 	virtual void update() override;

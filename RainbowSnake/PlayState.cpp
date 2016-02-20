@@ -5,9 +5,10 @@
 
 PlayState::PlayState(int STATE_ID, RenderWindow& window, Font& font)
 	:State(STATE_ID, window, font),
-	endOFGAME(false),
+	endOfGame(false),
 	switchToFailureScreen(false),
-	drawSnake(true)
+	drawSnake(true),
+	alphaColorChannel(0)
 {
 }
 
@@ -15,8 +16,8 @@ PlayState::PlayState(int STATE_ID, RenderWindow& window, Font& font)
 
 PlayState::~PlayState()
 {
-	delete snake;
-	delete apple;
+	delete _snake;
+	delete _apple;
 	music.stop();
 	
 }
@@ -31,9 +32,9 @@ Vector2f PlayState::getRandomPosition()
 	do
 	{
 		randomPosition = Vector2f(float(rand() % max.x), float(rand() % max.y));
-
-
-	} while (snake->intersects(randomPosition*(float)Game::APPLE_SIZE));
+		//Wiem, ¿e to nie jest za wydajne :( 
+		//Ale za to przejrzyste :)
+	} while (_snake->contains(randomPosition*(float)Game::APPLE_SIZE));
 
 	return randomPosition;
 }
@@ -58,117 +59,95 @@ void PlayState::setBackground()
 void PlayState::init() 
 {
 	
-	snake = new Snake();
-	.; for (int i = 0; i < 250; i++)snake->AddBodyPart();
-	apple = new RectangleShape();
+	_snake = new Snake();
+	
+	_apple = new RectangleShape();
+
 	music.openFromFile("data/FreeKO_Fame.ogg");
 	music.setLoop(true);
 	music.setRelativeToListener(true);
 	
-	apple->setSize(Vector2f((float)Game::APPLE_SIZE, (float)Game::APPLE_SIZE));
-	//apple->setFillColor(Color(230,230,230,90));
-	apple->setTexture(&appleTexture);
-	updateAppleRainbowTexture();
-	apple->setPosition(getRandomPosition()*(float)Game::APPLE_SIZE);
+	_apple->setSize(Vector2f((float)Game::APPLE_SIZE, (float)Game::APPLE_SIZE));
+	_apple->setPosition(getRandomPosition()*(float)Game::APPLE_SIZE);
+	setAppleFillColor();
 
 	setBackground();
 	mapBounds = FloatRect(0, 0, Game::SCRN_WIDTH, Game::SCRN_HEIGHT);
 
 	transparentBackgroundLayer.setPosition(Vector2f(0,0));
 	transparentBackgroundLayer.setSize(Vector2f(Game::SCRN_WIDTH, Game::SCRN_HEIGHT));
-	alphaColorChannel = 0;
-	transparentBackgroundLayer.setFillColor(Color(0, 0, 0, alphaColorChannel));
-	
-	clock.restart();
+	transparentBackgroundLayer.setFillColor(Color(0, 0, 0, 0));
+
 	music.setVolume(40.f);
 	music.play();
+	
+	clock.restart();
+	
 }
 
-void PlayState::updateAppleRainbowTexture()
+void PlayState::setAppleFillColor()
 {	
-	RectangleShape rainbow;
-	rainbow.setSize(Vector2f(Game::APPLE_SIZE, Game::APPLE_SIZE));
-	rainbow.setPosition(Vector2f(0, 0));
+		
+	_apple->setFillColor(getRandomColor());
 
-		Color rectangleNarrowtColor;
-		int n = rand() % 150 + 1;
+}
 
-		switch (int(n % 150) / 25)
-		{
-		case 0:
-			rectangleNarrowtColor = Color(255, 10 * (n % 25), 0);
-			break;
-		case 1:
-			rectangleNarrowtColor = Color(255 - 10 * (n % 25), 255, 0);
-			break;
-		case 2:
-			rectangleNarrowtColor = Color(0, 255, 10 * (n % 25));
-			break;
-		case 3:
-			rectangleNarrowtColor = Color(0, 255 - 10 * (n % 25), 255);
-			break;
-		case 4:
-			rectangleNarrowtColor = Color(10 * (n % 25), 0, 255);
-			break;
-		case 5:
-			rectangleNarrowtColor = Color(255, 0, 255 - 10 * (n % 25));
-			break;
+Color PlayState::getRandomColor()
+{
+	int n = rand() % 150 + 1;
 
-		}
-	
-		rainbow.setFillColor(rectangleNarrowtColor);
-
-
-	RenderTexture rainbowTexture;
-	rainbowTexture.create(Game::APPLE_SIZE, Game::APPLE_SIZE);
-
-	rainbowTexture.clear();
-
-	rainbowTexture.draw(rainbow);
-
-	rainbowTexture.display();
-
-	appleTexture = rainbowTexture.getTexture();
-
+	switch (int(n % 150) / 25)
+	{
+	case 0:
+		return Color(255, 10 * (n % 25), 0);
+	case 1:
+		return Color(255 - 10 * (n % 25), 255, 0);
+	case 2:
+		return Color(0, 255, 10 * (n % 25));
+	case 3:
+		return Color(0, 255 - 10 * (n % 25), 255);
+	case 4:
+		return Color(10 * (n % 25), 0, 255);
+	case 5:
+		return Color(255, 0, 255 - 10 * (n % 25));
+	}
 }
 
 void PlayState::update()
 {	
 
-	if (clock.getElapsedTime().asMilliseconds() > 125 && !endOFGAME)//TODO poziomy trudnoœci
+	if (clock.getElapsedTime().asMilliseconds() > 125 && !endOfGame)
 	{
-		updateAppleRainbowTexture();
-
-		if (snake->IsSelfBitting())
+		if (doesFailureOccurs())
 		{
-
-			endOFGAME = true;
+			endOfGame = true;
+			return;
 		}
 
+		setAppleFillColor();
+		_snake->Move();
 
-		else if (!mapBounds.contains(snake->getHeadPosition()))
+
+		if (_snake->GetHeadFloatRect() == _apple->getGlobalBounds())
 		{
-			endOFGAME = true;
+			_apple->setPosition(getRandomPosition()*(float)Game::APPLE_SIZE);
+			_snake->AddBodyPart();
 		}
 
-		if (!endOFGAME) 
-		{
-			snake->Move();
+		clock.restart();
 
-			if (snake->GetHeadFloatRect() == apple->getGlobalBounds())
-			{
-				apple->setPosition(getRandomPosition()*(float)Game::APPLE_SIZE);
-				snake->AddBodyPart();
-			}
-
-			clock.restart();
-		}
 	}
-	
-	if (endOFGAME)
+
+	else if (endOfGame)
 		handleFailure();
+}
 
+bool PlayState::doesFailureOccurs()
+{
+	if (_snake->IsSelfBitting() || !mapBounds.contains(_snake->GetHeadPosition()))
+		return true;
 
+	return false;
 }
 
 void PlayState::handleFailure()
@@ -178,11 +157,8 @@ void PlayState::handleFailure()
 
 	if (!playFailureAnimation())switchToFailureScreen = true;
 
-	if (alphaColorChannel < 120)
-	{
-		alphaColorChannel+=1;
-		transparentBackgroundLayer.setFillColor(Color(0, 0, 0, alphaColorChannel));
-	}
+	alphaColorChannel+= 1.5f;
+	transparentBackgroundLayer.setFillColor(Color(0, 0, 0, alphaColorChannel));
 }
 
 int PlayState::handleEvents(Event& event)
@@ -198,19 +174,19 @@ int PlayState::handleEvents(Event& event)
 			switch (event.key.code)
 			{
 			case Keyboard::Left:
-				snake->ChangeDirection(Snake::DIR_LEFT);
+				_snake->ChangeDirection(Snake::DIR_LEFT);
 				break;
 
 			case Keyboard::Right:
-				snake->ChangeDirection(Snake::DIR_RIGHT);
+				_snake->ChangeDirection(Snake::DIR_RIGHT);
 				break;
 
 			case Keyboard::Up:
-				snake->ChangeDirection(Snake::DIR_UP);
+				_snake->ChangeDirection(Snake::DIR_UP);
 				break;
 
 			case Keyboard::Down:
-				snake->ChangeDirection(Snake::DIR_DOWN);
+				_snake->ChangeDirection(Snake::DIR_DOWN);
 				break;
 			}
 		}
@@ -228,9 +204,9 @@ void PlayState::render()
 	for (unsigned int i = 0; i <mapTiles.size(); i++)
 		_window->draw(mapTiles[i]);
 	
-	_window->draw(*apple);
+	_window->draw(*_apple);
 	
-	if(drawSnake)_window->draw(*snake);
+	if(drawSnake)_window->draw(*_snake);
 
 	_window->draw(transparentBackgroundLayer);
 
@@ -240,7 +216,6 @@ void PlayState::render()
 bool PlayState::playFailureAnimation()
 {	
 	static int animationCounter;
-	static Clock clock;
 
 	if (clock.getElapsedTime().asSeconds() > 0.3f && drawSnake)
 	{
@@ -250,8 +225,8 @@ bool PlayState::playFailureAnimation()
 	else if (clock.getElapsedTime().asSeconds() > 0.2f && !drawSnake)
 	{
 		drawSnake = true;
-		clock.restart();
 		animationCounter++;
+		clock.restart();
 	}
 
 	if (animationCounter >= 3)

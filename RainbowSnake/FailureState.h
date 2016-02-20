@@ -11,10 +11,10 @@ public:
 private:
 	Text title;
 	Text menuOptions[2];
-	int points;
 	Texture backgroundTexture;
 	Sprite backgroundImage;
-	
+	void titleInit();
+	void menuOptionsInit();
 
 public:
 	virtual void init() override;

@@ -13,10 +13,7 @@ public:
 	static const int SCRN_WIDTH = 640;
 	static const int SCRN_HEIGHT = 640;
 	static const int APPLE_SIZE = 32;
-	static const int END = 0;
-	static const int MENU = 1;
-	static const int PLAY_STATE = 2;
-	static const int FAILURE= 3;
+	static enum {END, MENU, PLAY_STATE, FAILURE};
 private:
 	RenderWindow window;
 	Font font;

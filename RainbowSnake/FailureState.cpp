@@ -5,10 +5,8 @@
 FailureState::FailureState(int STATE_ID, RenderWindow& window, Font& font, Image& image)
 	:State(STATE_ID,window,font)
 {
-	
 	backgroundTexture.loadFromImage(image);
 	backgroundImage.setTexture(backgroundTexture);
-
 }
 
 
@@ -18,14 +16,22 @@ FailureState::~FailureState()
 
 void FailureState::init()
 {
+	titleInit();
+	menuOptionsInit();
+}
 
+void FailureState::titleInit()
+{
 	title.setString("YOU LOOSE!");
 	title.setFont(*_font);
 	title.setCharacterSize(86);
 	title.setColor(Color::Cyan);
 	title.setOrigin(Vector2f(title.getGlobalBounds().width / 2.f, title.getGlobalBounds().height / 2.f));
-	title.setPosition(Vector2f(Game::SCRN_WIDTH/2.f, (float)Game::APPLE_SIZE));
+	title.setPosition(Vector2f(Game::SCRN_WIDTH / 2.f, (float)Game::APPLE_SIZE));
+}
 
+void FailureState::menuOptionsInit()
+{
 	const int howManyMenuOptions = 2;
 
 	string menuOptionsStrings[howManyMenuOptions] = { "PLAY AGAIN", "RETURN TO MENU" };
@@ -38,9 +44,6 @@ void FailureState::init()
 		menuOptions[i].setOrigin(Vector2f(menuOptions[i].getGlobalBounds().width / 2.f, menuOptions[i].getGlobalBounds().height / 2.f));
 		menuOptions[i].setPosition(Vector2f((float)Game::SCRN_WIDTH / 2.f, (float)Game::SCRN_HEIGHT / 2.f - (float)Game::APPLE_SIZE + 2.5* (float)i*(float)Game::APPLE_SIZE));
 	}
-
-
-	
 }
 
 void FailureState::update()
@@ -67,10 +70,8 @@ int FailureState::handleEvents(Event& event)
 			return Game::END;
 
 		else if (event.type == Event::MouseButtonReleased && menuOptions[0].getGlobalBounds().contains(mousePosition))
-		{
-			cout << "Zwracam PLAT_STATE" << endl;
 			return Game::PLAY_STATE;
-		}
+		
 		else if (event.type == Event::MouseButtonReleased && menuOptions[1].getGlobalBounds().contains(mousePosition))
 			return Game::MENU;
 	}
@@ -83,9 +84,6 @@ void FailureState::render()
 	_window->clear();
 
 	_window->draw(backgroundImage);
-
-	
-
 	_window->draw(title);
 
 	for (int i = 0; i < 2; i++)

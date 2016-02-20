@@ -13,7 +13,10 @@ private:
 	Text title;
 	Text rainbow[7];
 	Text menuOptions[2];
-	Text signature;
+
+	void rainbowTextInit();
+	void titleInit();
+	void menuOptionsInit();
 
 public:
 	virtual void init() override;
